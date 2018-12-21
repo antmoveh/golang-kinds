@@ -6,7 +6,7 @@
     FROM k8s.gcr.io/kube-cross:v1.10.1-1
     MAINTAINER antmove
     ```
-- docker hub 
+- docker hub https://hub.docker.com/
   - 创建个人镜像仓库
   - 关联github账户
   - 创建自动构建流程
