@@ -1,18 +1,18 @@
-# À­È¡¹È¸è¾µÏñ´úÀí·şÎñ
--  ²éÑ¯¹È¸è¾µÏñºÍËûµÄtag
+# æ‹‰å–è°·æ­Œé•œåƒä»£ç†æœåŠ¡
+-  æŸ¥è¯¢è°·æ­Œé•œåƒå’Œä»–çš„tag
   https://console.cloud.google.com/gcr/images/google-containers?project=google-containers 
-- github²Ö¿âÄ¿Â¼ÖĞ´´½¨makefile
+- githubä»“åº“ç›®å½•ä¸­åˆ›å»ºdockerfile
     ```
     FROM k8s.gcr.io/kube-cross:v1.10.1-1
     MAINTAINER antmove
     ```
 - docker hub https://hub.docker.com/
-  - ´´½¨¸öÈË¾µÏñ²Ö¿â
-  - ¹ØÁªgithubÕË»§
-  - ´´½¨×Ô¶¯¹¹½¨Á÷³Ì
-  - ÅäÖÃgithubÉÏµÄdockerfileÄ¿Â¼µØÖ·
-  - Ö´ĞĞ¹¹½¨À­È¡¾µÏñ
-- À­È¡³É¹¦ºó·şÎñÆ÷ÉÏÀ­È¡¸öÈË¾µÏñ²Ö¿âÖĞµÄ¾µÏñ
+  - åˆ›å»ºä¸ªäººé•œåƒä»“åº“
+  - å…³è”githubè´¦æˆ·
+  - åˆ›å»ºè‡ªåŠ¨æ„å»ºæµç¨‹
+  - é…ç½®githubä¸Šçš„dockerfileç›®å½•åœ°å€
+  - æ‰§è¡Œæ„å»ºæ‹‰å–é•œåƒ
+- æ‹‰å–æˆåŠŸåæœåŠ¡å™¨ä¸Šæ‹‰å–ä¸ªäººé•œåƒä»“åº“ä¸­çš„é•œåƒ
   - docker pull antmove/kube-cross:v1.10.1-1
   - docker tag antmove/kube-cross:v1.10.1-1 k8s.gcr.io/kube-cross:v1.10.1-1
-- ÖÁ´ËÀ­È¡Íê³É
+- è‡³æ­¤æ‹‰å–å®Œæˆ
