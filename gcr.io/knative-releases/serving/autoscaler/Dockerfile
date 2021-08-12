@@ -1,2 +1,0 @@
-FROM gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler@sha256:bc1f5dc5594e880dcb126336d8344f0a87cf22075ef32eebd3280e6548ef22ef
-MAINTAINER antmove

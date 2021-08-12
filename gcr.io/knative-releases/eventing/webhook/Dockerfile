@@ -1,2 +1,0 @@
-FROM gcr.io/knative-releases/knative.dev/eventing/cmd/webhook@sha256:4aee6cf591cb3076c57370ea13e593633eb6007f75b8d8f191c573b223b19cea
-MAINTAINER antmove

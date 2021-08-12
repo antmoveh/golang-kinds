@@ -1,2 +1,0 @@
-FROM gcr.io/knative-releases/knative.dev/eventing/cmd/mtbroker/filter@sha256:0a7038418865483d561b76434f6fef28081705adb57abd88e47017f4c6defdc9
-MAINTAINER antmove

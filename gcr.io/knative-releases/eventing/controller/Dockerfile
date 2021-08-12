@@ -1,2 +1,0 @@
-FROM gcr.io/knative-releases/knative.dev/eventing/cmd/controller@sha256:7d0200c6e2e77f196da33296a4eb8636e1a97e1c3daf05f569c952a2f41abefe
-MAINTAINER antmove

@@ -1,2 +1,0 @@
-FROM gcr.io/knative-releases/knative.dev/eventing/cmd/apiserver_receive_adapter@sha256:ed89ac0fd5d12034c55bd48ce6af826e4cae0c3a5ffaa9bf962485948f5d8ae9
-MAINTAINER antmove

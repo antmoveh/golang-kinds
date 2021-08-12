@@ -1,2 +1,0 @@
-FROM gcr.io/knative-releases/knative.dev/eventing/cmd/mtchannel_broker@sha256:19d0db6b659abac02a1c251f6d476669bbfc5f9a018e8e9b4bdeb6b7245f5f97
-MAINTAINER antmove
