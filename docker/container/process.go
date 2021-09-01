@@ -15,12 +15,14 @@
 package container
 
 import (
+	"github.com/go-kinds/docker/common"
+	"github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"syscall"
 )
 
-func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume, containerName, imageName string, envs []string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, _ := os.Pipe()
 	cmd := exec.Command("/proc/self/exe", "init")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -31,6 +33,13 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
+	cmd.Env = append(os.Environ(), envs...)
 	cmd.ExtraFiles = []*os.File{readPipe}
+
+	err := NewWorkSpace(volume, containerName, imageName)
+	if err != nil {
+		logrus.Errorf("new work space, err : %v", err)
+	}
+	cmd.Dir = common.MntPath
 	return cmd, writePipe
 }

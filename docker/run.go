@@ -23,8 +23,8 @@ import (
 	"strings"
 )
 
-func Run(cmdArray []string, tty bool, res *subsystem.ResourceConfig) {
-	parent, writePipe := container.NewParentProcess(tty)
+func Run(cmdArray []string, tty bool, res *subsystem.ResourceConfig, containerName, imageName, volume, net string, envs, ports []string) {
+	parent, writePipe := container.NewParentProcess(tty, volume, containerName, imageName, envs)
 	if parent == nil {
 		logrus.Errorf("failed to new parent process")
 		return
@@ -41,6 +41,11 @@ func Run(cmdArray []string, tty bool, res *subsystem.ResourceConfig) {
 	//  write cmd to pipe when init start
 	sendInitCommand(cmdArray, writePipe)
 	parent.Wait()
+
+	err := container.DeleteWorkSpace(containerName, volume)
+	if err != nil {
+		logrus.Errorf("delete work space, err: %v", err)
+	}
 }
 
 func sendInitCommand(cmdArray []string, writePipe *os.File) {

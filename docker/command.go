@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-kinds/docker/cgroups/subsystem"
 	"github.com/go-kinds/docker/container"
@@ -42,23 +43,50 @@ var runCommand = cli.Command{
 			Name:  "cpuset",
 			Usage: "cpuset limit",
 		},
+		cli.StringFlag{
+			Name:  "v",
+			Usage: "docker volume",
+		},
+		cli.StringFlag{
+			Name:  "name",
+			Usage: "container name",
+		},
+		cli.StringSliceFlag{
+			Name:  "e",
+			Usage: "docker env",
+		},
+		cli.StringFlag{
+			Name:  "net",
+			Usage: "container network",
+		},
+		cli.StringSliceFlag{
+			Name:  "p",
+			Usage: "port mapping",
+		},
 	},
-	Action: func(context *cli.Context) error {
-		if len(context.Args()) < 1 {
+	Action: func(ctx *cli.Context) error {
+		if len(ctx.Args()) < 1 {
 			return fmt.Errorf("missing container args")
 		}
-		tty := context.Bool("ti")
+		tty := ctx.Bool("ti")
 		res := &subsystem.ResourceConfig{
-			MemoryLimit: context.String("m"),
-			CpuSet:      context.String("cpuset"),
-			CpuShare:    context.String("cpushare"),
+			MemoryLimit: ctx.String("m"),
+			CpuSet:      ctx.String("cpuset"),
+			CpuShare:    ctx.String("cpushare"),
 		}
 
 		var cmdArry []string
-		for _, arg := range context.Args() {
+		for _, arg := range ctx.Args() {
 			cmdArry = append(cmdArry, arg)
 		}
-		Run(cmdArry, tty, res)
+		containerName := ctx.String("name")
+		volume := ctx.String("v")
+		imageName := ctx.Args().Get(0)
+		envs := ctx.StringSlice("e")
+		ports := ctx.StringSlice("p")
+		net := ctx.String("net")
+
+		Run(cmdArry, tty, res, containerName, imageName, volume, net, envs, ports)
 
 		return nil
 	},
