@@ -13,3 +13,39 @@
    limitations under the License.
 */
 package main
+
+import (
+	"github.com/go-kinds/docker/cgroups"
+	"github.com/go-kinds/docker/cgroups/subsystem"
+	"github.com/go-kinds/docker/container"
+	"github.com/sirupsen/logrus"
+	"os"
+	"strings"
+)
+
+func Run(cmdArray []string, tty bool, res *subsystem.ResourceConfig) {
+	parent, writePipe := container.NewParentProcess(tty)
+	if parent == nil {
+		logrus.Errorf("failed to new parent process")
+		return
+	}
+	if err := parent.Start(); err != nil {
+		logrus.Errorf("parent start failed, err: %v", err)
+		return
+	}
+	cgroupManager := cgroups.NewCGroupManager("go-docker")
+	defer cgroupManager.Destroy()
+	cgroupManager.Set(res)
+	cgroupManager.Apply(parent.Process.Pid)
+
+	//  write cmd to pipe when init start
+	sendInitCommand(cmdArray, writePipe)
+	parent.Wait()
+}
+
+func sendInitCommand(cmdArray []string, writePipe *os.File) {
+	command := strings.Join(cmdArray, " ")
+	logrus.Info("command all is %s", command)
+	_, _ = writePipe.WriteString(command)
+	_ = writePipe.Close()
+}

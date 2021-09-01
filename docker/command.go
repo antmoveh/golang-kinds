@@ -13,3 +13,62 @@
    limitations under the License.
 */
 package main
+
+import (
+	"fmt"
+	"github.com/go-kinds/docker/cgroups/subsystem"
+	"github.com/go-kinds/docker/container"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
+)
+
+var runCommand = cli.Command{
+	Name:  "run",
+	Usage: "Create  a container with namespace and cgroups limit",
+	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name:  "ti",
+			Usage: "enable tty",
+		},
+		cli.StringFlag{
+			Name:  "m",
+			Usage: "memory limit",
+		},
+		cli.StringFlag{
+			Name:  "cpushare",
+			Usage: "cpushare limit",
+		},
+		cli.StringFlag{
+			Name:  "cpuset",
+			Usage: "cpuset limit",
+		},
+	},
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
+			return fmt.Errorf("missing container args")
+		}
+		tty := context.Bool("ti")
+		res := &subsystem.ResourceConfig{
+			MemoryLimit: context.String("m"),
+			CpuSet:      context.String("cpuset"),
+			CpuShare:    context.String("cpushare"),
+		}
+
+		var cmdArry []string
+		for _, arg := range context.Args() {
+			cmdArry = append(cmdArry, arg)
+		}
+		Run(cmdArry, tty, res)
+
+		return nil
+	},
+}
+
+var initCommand = cli.Command{
+	Name:  "init",
+	Usage: "Init container process run user's process in container. Do not call it outside",
+	Action: func(context *cli.Context) error {
+		logrus.Info("init come on")
+		return container.RunContainerInitProcess()
+	},
+}

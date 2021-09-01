@@ -16,97 +16,29 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
 	"os"
-	"os/exec"
-	"path"
-	"strconv"
-	"strings"
-	"syscall"
 )
 
-// func main() {
-// 	cmd := exec.Command("sh")
-// 	cmd.SysProcAttr = &syscall.SysProcAttr{
-// 		Cloneflags: syscall.CLONE_NEWUTS |
-// 			syscall.CLONE_NEWIPC |
-// 			syscall.CLONE_NEWPID |
-// 			syscall.CLONE_NEWNS |
-// 			syscall.CLONE_NEWUSER |
-// 			syscall.CLONE_NEWNET,
-// 		UidMappings: []syscall.SysProcIDMap{
-// 			{
-// 				ContainerID: 1,
-// 				HostID:      0,
-// 				Size:        1,
-// 			},
-// 		},
-// 		GidMappings: []syscall.SysProcIDMap{
-// 			{
-// 				ContainerID: 1,
-// 				HostID:      0,
-// 				Size:        1,
-// 			},
-// 		},
-// 	}
-// 	cmd.Stdin = os.Stdin
-// 	cmd.Stdout = os.Stdout
-// 	cmd.Stderr = os.Stderr
-//
-// 	if err := cmd.Run(); err != nil {
-// 		log.Fatal(err)
-// 	}
-//
-// }
-
-const (
-	cgroupMemoryHierarchyMount = "/sys/fs/cgroup/memory"
-)
+const usage = `go-docker`
 
 func main() {
-	fmt.Println(strings.Join(os.Args, ","))
+	app := cli.NewApp()
+	app.Name = "go-docker"
+	app.Usage = usage
 
-	if os.Args[0] == "/proc/self/exe" {
-		// container proc
-		fmt.Printf("current pid %d \n", syscall.Getpid())
-		cmd := exec.Command("sh", "-c", "stress --vm-bytes 200m --vm-keep -m 1")
-		cmd.SysProcAttr = &syscall.SysProcAttr{}
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			panic(err)
-		}
+	app.Commands = []cli.Command{
+		runCommand,
+		initCommand,
 	}
 
-	cmd := exec.Command("/proc/self/exe")
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+	app.Before = func(context *cli.Context) error {
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+		logrus.SetOutput(os.Stdout)
+		return nil
 	}
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Start()
-	if err != nil {
-		panic(err)
+	if err := app.Run(os.Args); err != nil {
+		logrus.Fatal(err)
 	}
-	fmt.Printf("%+v", cmd.Process.Pid)
-
-	newCgroup := path.Join(cgroupMemoryHierarchyMount, "cgroup-demo-memroy")
-	_ = os.Remove(newCgroup)
-	if err := os.Mkdir(newCgroup, 0755); err != nil {
-		panic(err)
-	}
-
-	if err := ioutil.WriteFile(path.Join(newCgroup, "tasks"), []byte(strconv.Itoa(cmd.Process.Pid)), 0644); err != nil {
-		panic(err)
-	}
-
-	if err := ioutil.WriteFile(path.Join(newCgroup, "memory.limit_in_bytes"), []byte("100m"), 0644); err != nil {
-		panic(err)
-	}
-
-	cmd.Process.Wait()
-
 }
