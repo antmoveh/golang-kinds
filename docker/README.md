@@ -14,3 +14,7 @@ $ cd /tmp/container
 $ docker export $(docker create registry.cn-hangzhou.aliyuncs.com/antmoveh/busybox:1.32) | tar -C rootfs -xvf -
 
 ```
+
+##### 参考
+- https://learnku.com/users/42861
+- <<自己动手写docker>>
