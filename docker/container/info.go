@@ -1,5 +1,4 @@
 /*
-
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -12,15 +11,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package common
 
-const (
-	RootPath   = "/root/"
-	MntPath    = "/root/mnt"
-	WriteLayer = "writeLayer"
-)
+package container
 
-const (
-	DefaultNetworkPath   = "/var/run/go-docker/network/network/"
-	DefaultAllocatorPath = "/var/run/go-docker/network/ipam/subnet.json"
-)
+type ContainerInfo struct {
+	Pid         string   `json:"pid"`
+	Id          string   `json:"id"`
+	Command     string   `json:"command"`
+	Name        string   `json:"name"`
+	CreateTime  string   `json:"create_time"`
+	Status      string   `json:"status"`
+	Volume      string   `json:"volume"`
+	PortMapping []string `json:"port_mapping"`
+}

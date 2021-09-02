@@ -18,8 +18,10 @@ import (
 	"github.com/go-kinds/docker/cgroups"
 	"github.com/go-kinds/docker/cgroups/subsystem"
 	"github.com/go-kinds/docker/container"
+	"github.com/go-kinds/docker/network"
 	"github.com/sirupsen/logrus"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -37,6 +39,24 @@ func Run(cmdArray []string, tty bool, res *subsystem.ResourceConfig, containerNa
 	defer cgroupManager.Destroy()
 	cgroupManager.Set(res)
 	cgroupManager.Apply(parent.Process.Pid)
+
+	if net != "" {
+		err := network.Init()
+		if err != nil {
+			logrus.Errorf("network init failed, err: %v", err)
+			return
+		}
+		containerInfo := &container.ContainerInfo{
+			Id:          "containerID",
+			Pid:         strconv.Itoa(parent.Process.Pid),
+			Name:        containerName,
+			PortMapping: ports,
+		}
+		if err := network.Connect(net, containerInfo); err != nil {
+			logrus.Errorf("connect network, err: %v", err)
+			return
+		}
+	}
 
 	//  write cmd to pipe when init start
 	sendInitCommand(cmdArray, writePipe)

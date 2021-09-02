@@ -12,6 +12,5 @@ $ docker pull registry.cn-hangzhou.aliyuncs.com/antmoveh/busybox:1.32
 $ mkdir -p /tmp/container/rootfs
 $ cd /tmp/container
 $ docker export $(docker create registry.cn-hangzhou.aliyuncs.com/antmoveh/busybox:1.32) | tar -C rootfs -xvf -
-```
 
-- 为了简便便直接启动服务
+```
