@@ -18,8 +18,8 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"performance/simual"
 	"runtime"
-	"sync"
 	"time"
 )
 
@@ -39,8 +39,7 @@ func main() {
 	}()
 
 	for {
-		CallChain()
+		simual.CallChain()
 		time.Sleep(time.Second)
 	}
 }
-
