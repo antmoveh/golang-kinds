@@ -29,3 +29,14 @@ $ cd FlameGraph
 $ ./flamegraph.pl --color=mem --title="malloc() bytes Flame Graph" --countname=bytes < out.stacks > out.svg
 
 ```
+
+#### Docker Debug
+
+```shell script
+$ echo '{"debug": true}' > /etc/docker/daemon.json
+$ systemctl restart docker
+
+// transpond
+$ socat -d -d TCP-LISTEN:8080,fork UNIX:/var/run/docker.sock
+$ go tool pprof -http=:8081 http://192.168.56.150:8080/debug/pprof/profile
+```
