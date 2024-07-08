@@ -9,8 +9,8 @@
 
 ### 使用方法
 
-- 使用如下命令，拉取所有的仓库代码
+- 编译
 
 ```bash
-./repo.exe -u <username> -t <token> -o <output>
+go build -o repo.exe
 ```
