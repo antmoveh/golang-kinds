@@ -266,15 +266,6 @@ func runCmd(cmd string, timeout time.Duration) error {
 	return nil
 }
 
-// isExists判断文件是否存在
-//func isExists(path string) bool {
-//	_, err := os.Stat(path)
-//	if err != nil {
-//		fmt.Println(err.Error())
-//	}
-//	return err == nil || os.IsExist(err)
-//}
-
 // win 判断文件夹是否存在
 func isExists(path string) bool {
 	// 判断目录是否存在
