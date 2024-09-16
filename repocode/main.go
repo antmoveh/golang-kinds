@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 var options Options
@@ -49,4 +50,5 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&options.Token, "token", "", "gitlab token")
 	rootCmd.PersistentFlags().StringVar(&options.Output, "output", "", "output dir")
 	rootCmd.PersistentFlags().IntVar(&options.Number, "number", 5, "number of projects")
+	rootCmd.PersistentFlags().DurationVar(&options.TimeOut, "timeOut", 30*time.Second, "time out")
 }

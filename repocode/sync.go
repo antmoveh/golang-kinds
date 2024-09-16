@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -14,11 +16,12 @@ import (
 )
 
 type Options struct {
-	Args   []string `json:"args"`
-	Url    string   `json:"url"`
-	Token  string   `json:"token"`
-	Output string   `json:"output"`
-	Number int      `json:"number"`
+	Args    []string      `json:"args"`
+	Url     string        `json:"url"`
+	Token   string        `json:"token"`
+	Output  string        `json:"output"`
+	Number  int           `json:"number"`
+	TimeOut time.Duration `json:"timeOut""`
 }
 
 // sync 实现从gitlab获取所有项目
@@ -70,7 +73,7 @@ func (o *Options) sync() {
 	}
 
 	// 下载仓库
-	downloadRepo(projects, o.Output, o.Number)
+	downloadRepo(projects, o.Output, o.Number, o.TimeOut)
 }
 
 // Project 代表GitLab项目的简化结构
@@ -113,7 +116,7 @@ func getProjects(url, token string, perPage int) ([]Project, error) {
 	return projects, nil
 }
 
-func downloadRepo(projects []Project, output string, number int) {
+func downloadRepo(projects []Project, output string, number int, timeout time.Duration) {
 
 	// 获取output目录下前两层的文件
 	files, err := os.ReadDir(output)
@@ -141,6 +144,8 @@ func downloadRepo(projects []Project, output string, number int) {
 			}
 		}
 	}
+	fmt.Println(fmt.Sprintf("project number: %d, exist project number: %d", len(projects), existProjectNumber))
+
 	// 保证必须有number个仓库更新，优先更新未有仓库
 	start := 0
 	if existProjectNumber+number <= len(projects) {
@@ -150,8 +155,16 @@ func downloadRepo(projects []Project, output string, number int) {
 		if existProjectNumber < len(projects) {
 			start = len(projects) - number
 		} else {
-			start = rand.Int() % (len(projects) - number)
+			// 保证必须有number个仓库更新
+			if number >= len(projects) {
+				start = 0
+			} else {
+				start = rand.Int() % (len(projects) - number)
+			}
 		}
+	}
+	if start < 0 {
+		start = 0
 	}
 
 	// 遍历projects
@@ -184,40 +197,70 @@ func downloadRepo(projects []Project, output string, number int) {
 
 		if isExists(repoName) {
 			// Navigate into the repository directory
-			_ = os.Chdir(repoName)
+			err = os.Chdir(repoName)
+			if err != nil {
+				fmt.Println("Error changing directory:", err)
+				continue
+			}
 			// Pull the latest changes for the current branch
-			_ = runCmd("git pull")
+			err = runCmd("git pull", timeout)
+			if err != nil {
+				fmt.Println("Error pulling repository:", err)
+				continue
+			}
 			// Fetch all branches
-			_ = runCmd("git fetch --all")
+			err = runCmd("git fetch --all", timeout)
+			if err != nil {
+				fmt.Println("Error fetching branches:", err)
+				continue
+			}
 			// Navigate back to the original directory
-			_ = os.Chdir("..")
+			err = os.Chdir("..")
+			if err != nil {
+				fmt.Println("Error changing directory:", err)
+				continue
+			}
 		} else {
 			// Clone the repository
 			cmd := fmt.Sprintf("git clone %s %s", project.HTTPURLToRepo, repoName)
-			if err = runCmd(cmd); err != nil {
+			if err = runCmd(cmd, timeout); err != nil {
 				fmt.Println("Error cloning repository:", err)
-				return
+				continue
 			}
 			// Navigate into the cloned repository directory
-			_ = os.Chdir(repoName)
+			err = os.Chdir(repoName)
+			if err != nil {
+				fmt.Println("Error changing directory:", err)
+				continue
+			}
 			// Fetch all branches
-			_ = runCmd("git fetch --all")
+			err = runCmd("git fetch --all", timeout)
+			if err != nil {
+				fmt.Println("Error fetching branches:", err)
+				continue
+			}
 			// Navigate back to the original directory
-			_ = os.Chdir("..")
+			err = os.Chdir("..")
+			if err != nil {
+				fmt.Println("Error changing directory:", err)
+				continue
+			}
 		}
 	}
 }
 
-// runCmd 执行shell命令
-func runCmd(cmd string) error {
-	// Split the command string into individual arguments
+func runCmd(cmd string, timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
 	parts := strings.Fields(cmd)
-	// Execute the command
-	out, err := exec.Command(parts[0], parts[1:]...).Output()
+	out, err := exec.CommandContext(ctx, parts[0], parts[1:]...).Output()
 	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			return errors.New("command timed out")
+		}
 		return err
 	}
-	// Print the command output
 	fmt.Println(string(out))
 	return nil
 }
