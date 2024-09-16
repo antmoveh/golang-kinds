@@ -194,8 +194,8 @@ func downloadRepo(projects []Project, output string, number int, timeout time.Du
 		}
 
 		repoName := path.Join(output, directoryName, projectName)
-
-		if isExists(repoName) {
+		if isExists(repoName) || number > 999 {
+			fmt.Println(fmt.Sprintf("repoName: %s exists", repoName))
 			// Navigate into the repository directory
 			err = os.Chdir(repoName)
 			if err != nil {
@@ -223,6 +223,7 @@ func downloadRepo(projects []Project, output string, number int, timeout time.Du
 		} else {
 			// Clone the repository
 			cmd := fmt.Sprintf("git clone %s %s", project.HTTPURLToRepo, repoName)
+			fmt.Println(cmd)
 			if err = runCmd(cmd, timeout); err != nil {
 				fmt.Println("Error cloning repository:", err)
 				continue
@@ -266,7 +267,27 @@ func runCmd(cmd string, timeout time.Duration) error {
 }
 
 // isExists判断文件是否存在
+//func isExists(path string) bool {
+//	_, err := os.Stat(path)
+//	if err != nil {
+//		fmt.Println(err.Error())
+//	}
+//	return err == nil || os.IsExist(err)
+//}
+
+// win 判断文件夹是否存在
 func isExists(path string) bool {
+	// 判断目录是否存在
 	_, err := os.Stat(path)
-	return err == nil || os.IsExist(err)
+	if err != nil {
+		fmt.Println(err.Error())
+		if os.IsExist(err) {
+			return true
+		}
+		if os.IsNotExist(err) {
+			return false
+		}
+		return false
+	}
+	return true
 }
